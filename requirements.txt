@@ -1,0 +1,6 @@
+Django
+djangorestframework
+openpyxl
+pandas
+python-docx
+psycopg2-binary

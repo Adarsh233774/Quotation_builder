@@ -1,0 +1,50 @@
+<tr class="item-row" id="item-{{ item.pk }}">
+    <td>
+        <input type="text" name="description" value="{{ item.description|default:'' }}" 
+               hx-post="{% url 'htmx_update_item' item.pk %}" 
+               hx-trigger="change, keyup delay:500ms"
+               hx-target="#item-{{ item.pk }}" 
+               hx-swap="outerHTML" style="border: none; background: transparent; padding: 0.5rem; width: 100%;">
+    </td>
+    <td>
+        <select name="calculation_type" 
+                hx-post="{% url 'htmx_update_item' item.pk %}" 
+                hx-trigger="change" 
+                hx-target="#item-{{ item.pk }}" 
+                hx-swap="outerHTML" style="border: none; background: transparent; padding: 0.5rem;">
+            <option value="AREA_RATE" {% if item.calculation_type == 'AREA_RATE' %}selected{% endif %}>Area &#215; Rate</option>
+            <option value="QTY_RATE" {% if item.calculation_type == 'QTY_RATE' %}selected{% endif %}>Qty &#215; Rate</option>
+            <option value="FIXED" {% if item.calculation_type == 'FIXED' %}selected{% endif %}>Fixed</option>
+        </select>
+    </td>
+    <td>
+        <input type="number" step="0.01" name="length" class="input-sm" value="{{ item.length|default:'' }}"
+               {% if item.calculation_type != 'AREA_RATE' %}disabled style="opacity: 0.5;"{% endif %}
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup delay:500ms" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+    </td>
+    <td>
+        <input type="number" step="0.01" name="width" class="input-sm" value="{{ item.width|default:'' }}"
+               {% if item.calculation_type != 'AREA_RATE' %}disabled style="opacity: 0.5;"{% endif %}
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup delay:500ms" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+    </td>
+    <td>
+        <input type="number" step="0.01" name="quantity" class="input-sm" value="{{ item.quantity|default:'' }}"
+               {% if item.calculation_type == 'FIXED' %}disabled style="opacity: 0.5;"{% endif %}
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup delay:500ms" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+    </td>
+    <td>
+        <input type="number" step="0.01" name="rate" class="input-sm" value="{{ item.rate|default:'' }}"
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup delay:500ms" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+    </td>
+    <td style="vertical-align: middle; font-weight: 500;">
+        {{ item.amount }}
+    </td>
+    
+    <!-- HTMX OOB updates for totals -->
+    <div hx-swap-oob="innerHTML:#section-total-{{ item.section.pk }}">
+        &#8377; {{ item.section.section_total }}
+    </div>
+    <div hx-swap-oob="innerHTML:#grand-total">
+        &#8377; {{ item.section.quotation.total_amount }}
+    </div>
+</tr>

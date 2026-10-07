@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="margin-bottom: 2rem;">New Quotation</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary);">Project / Client</label>
+            <select name="project_id" required>
+                <option value="">Select Project</option>
+                {% for p in projects %}
+                    <option value="{{ p.id }}">{{ p.name }} ({{ p.client.name }})</option>
+                {% endfor %}
+            </select>
+            <p style="font-size: 0.8rem; margin-top:0.5rem;"><a href="#">+ Add new project</a></p>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary);">Quotation Number</label>
+            <input type="text" name="quotation_number" required placeholder="e.g. QTN/2026/001">
+        </div>
+        
+        <div style="margin-bottom: 2rem;">
+            <label style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary);">Date</label>
+            <input type="date" name="date" required>
+        </div>
+        
+        <button type="submit" class="btn">Create & Build</button>
+    </form>
+</div>
+{% endblock %}

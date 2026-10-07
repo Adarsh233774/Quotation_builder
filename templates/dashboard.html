@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2>Dashboard</h2>
+    <a href="{% url 'quotation_create' %}" class="btn">Create Quotation</a>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 1.5rem;">Recent Quotations</h3>
+    {% if quotations %}
+        <table class="builder-table">
+            <thead>
+                <tr>
+                    <th>Quotation Number</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for q in quotations %}
+                <tr>
+                    <td>{{ q.quotation_number }}</td>
+                    <td>{{ q.date }}</td>
+                    <td>{{ q.get_status_display }}</td>
+                    <td>&#8377; {{ q.total_amount }}</td>
+                    <td>
+                        <a href="{% url 'quotation_builder' q.pk %}" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color: var(--text-secondary);">No quotations found. Start by creating one.</p>
+    {% endif %}
+</div>
+{% endblock %}

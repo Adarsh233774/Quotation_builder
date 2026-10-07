@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between;">
+        <div>
+            <h1 style="color: var(--accent-color); margin-bottom: 0.5rem;">{{ quotation.quotation_number }}</h1>
+            <p style="color: var(--text-secondary);">Project: {{ quotation.project.name }} &bull; Date: {{ quotation.date }}</p>
+        </div>
+        <div style="text-align: right;">
+            <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary);">Total Investment</p>
+            <h2 style="font-size: 2rem;" id="grand-total">&#8377; {{ quotation.total_amount }}</h2>
+        </div>
+    </div>
+</div>
+
+<div id="sections-container">
+    {% for section in quotation.sections.all %}
+        {% include 'quotations/partials/section.html' %}
+    {% endfor %}
+</div>
+
+<div style="margin-top: 2rem; text-align: center;">
+    <form hx-post="{% url 'htmx_add_section' quotation.pk %}" hx-target="#sections-container" hx-swap="beforeend">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="New Section Name (e.g., Dining Room)" style="width: 300px; display: inline-block; margin-right: 1rem;" required>
+        <button type="submit" class="btn btn-secondary">+ Add Section</button>
+    </form>
+</div>
+{% endblock %}

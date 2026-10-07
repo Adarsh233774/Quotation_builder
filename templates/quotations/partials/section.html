@@ -1,0 +1,32 @@
+<div class="card" style="margin-bottom: 2rem;" id="section-{{ section.pk }}">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <h3 style="color: var(--accent-color);">{{ section.name }}</h3>
+        <h3 id="section-total-{{ section.pk }}">&#8377; {{ section.section_total }}</h3>
+    </div>
+    
+    <table class="builder-table">
+        <thead>
+            <tr>
+                <th style="width: 30%">Description</th>
+                <th>Type</th>
+                <th>L</th>
+                <th>W</th>
+                <th>Qty</th>
+                <th>Rate (&#8377;)</th>
+                <th>Amount (&#8377;)</th>
+            </tr>
+        </thead>
+        <tbody id="items-container-{{ section.pk }}">
+            {% for item in section.items.all %}
+                {% include 'quotations/partials/item_row.html' %}
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 1rem;">
+        <form hx-post="{% url 'htmx_add_item' section.pk %}" hx-target="#items-container-{{ section.pk }}" hx-swap="beforeend">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.75rem;">+ Add Item</button>
+        </form>
+    </div>
+</div>

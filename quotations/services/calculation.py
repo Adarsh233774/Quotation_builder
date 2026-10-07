@@ -1,0 +1,67 @@
+from decimal import Decimal
+from django.db import transaction
+
+def calculate_item(item):
+    """
+    Calculates the area and amount for a single QuotationItem.
+    Updates the object but does NOT call save().
+    """
+    # Ensure standard Decimals
+    qty = Decimal(str(item.quantity)) if item.quantity else Decimal('1')
+    rate = Decimal(str(item.rate)) if item.rate else Decimal('0')
+
+    if item.calculation_type == 'FIXED':
+        # Amount is just rate (fixed price)
+        item.area = Decimal('0')
+        item.amount = rate
+    elif item.calculation_type == 'QTY_RATE':
+        item.area = Decimal('0')
+        item.amount = qty * rate
+    elif item.calculation_type == 'AREA_RATE':
+        length = Decimal(str(item.length)) if item.length else Decimal('0')
+        width = Decimal(str(item.width)) if item.width else Decimal('0')
+        area = length * width
+        item.area = area
+        item.amount = area * rate
+    elif item.calculation_type == 'CUSTOM_AREA':
+        area = Decimal(str(item.area)) if item.area else Decimal('0')
+        item.amount = area * rate
+    
+    # Optional formatting for rounding, currently keep exact
+    return item
+
+def calculate_section(section):
+    """
+    Calculates the section total by aggregating all items.
+    Updates the section object but does NOT call save().
+    """
+    total = Decimal('0')
+    for item in section.items.all():
+        calculate_item(item)
+        item.save()
+        total += item.amount
+    
+    section.section_total = total
+    return section
+
+@transaction.atomic
+def calculate_quotation(quotation):
+    """
+    Calculates the subtotal, taxes, and total_amount for the entire quotation.
+    Saves the entire hierarchy safely.
+    """
+    subtotal = Decimal('0')
+    for section in quotation.sections.all():
+        calculate_section(section)
+        section.save()
+        subtotal += section.section_total
+
+    quotation.subtotal = subtotal
+    # Example tax calculation logic can go here if needed.
+    # Currently assuming tax and additional_charges are explicitly set or calculated elsewhere.
+    tax = Decimal(str(quotation.tax)) if quotation.tax else Decimal('0')
+    additional = Decimal(str(quotation.additional_charges)) if quotation.additional_charges else Decimal('0')
+    
+    quotation.total_amount = subtotal + tax + additional
+    quotation.save()
+    return quotation
