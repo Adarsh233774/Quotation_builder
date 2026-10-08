@@ -1,6 +1,22 @@
 from decimal import Decimal
 from django.db import transaction
 
+def parse_feet_inches(val):
+    if not val:
+        return Decimal('0')
+    val_str = str(val).strip()
+    if '.' not in val_str:
+        return Decimal(val_str)
+    
+    parts = val_str.split('.')
+    feet_str = parts[0]
+    inches_str = parts[1]
+    
+    feet = Decimal(feet_str) if feet_str else Decimal('0')
+    inches = Decimal(inches_str) if inches_str else Decimal('0')
+    
+    return feet + (inches / Decimal('12'))
+
 def calculate_item(item):
     """
     Calculates the area and amount for a single QuotationItem.
@@ -11,21 +27,21 @@ def calculate_item(item):
     rate = Decimal(str(item.rate)) if item.rate else Decimal('0')
 
     if item.calculation_type == 'FIXED':
-        # Amount is just rate (fixed price)
+        # Amount is just rate (fixed price) or explicitly set amount
         item.area = Decimal('0')
-        item.amount = rate
+        item.amount = Decimal(str(item.amount)) if getattr(item, '_manual_amount_override', False) else rate
     elif item.calculation_type == 'QTY_RATE':
         item.area = Decimal('0')
         item.amount = qty * rate
     elif item.calculation_type == 'AREA_RATE':
-        length = Decimal(str(item.length)) if item.length else Decimal('0')
-        width = Decimal(str(item.width)) if item.width else Decimal('0')
+        length = parse_feet_inches(item.length)
+        width = parse_feet_inches(item.width)
         area = length * width
         item.area = area
-        item.amount = area * rate
+        item.amount = area * rate * qty
     elif item.calculation_type == 'CUSTOM_AREA':
         area = Decimal(str(item.area)) if item.area else Decimal('0')
-        item.amount = area * rate
+        item.amount = area * rate * qty
     
     # Optional formatting for rounding, currently keep exact
     return item

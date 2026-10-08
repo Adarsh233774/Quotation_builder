@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="margin-bottom: 2rem;">New Project</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary);">Project Name</label>
+            <input type="text" name="name" required placeholder="e.g. Office Renovation">
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary);">Client</label>
+            <select name="client_id" required>
+                <option value="">Select Client</option>
+                {% for c in clients %}
+                    <option value="{{ c.id }}">{{ c.name }}{% if c.company %} ({{ c.company }}){% endif %}</option>
+                {% endfor %}
+            </select>
+            <p style="font-size: 0.8rem; margin-top:0.5rem;"><a href="{% url 'client_create' %}">+ Add new client</a></p>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary);">Location (Optional)</label>
+            <input type="text" name="location" placeholder="e.g. New York">
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary);">Project Type (Optional)</label>
+            <input type="text" name="project_type" placeholder="e.g. Commercial">
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label style="display:block; margin-bottom: 0.5rem; color: var(--text-secondary);">Reference (Optional)</label>
+            <input type="text" name="reference">
+        </div>
+        
+        <button type="submit" class="btn">Create Project</button>
+    </form>
+</div>
+{% endblock %}

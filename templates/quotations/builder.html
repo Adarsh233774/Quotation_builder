@@ -2,9 +2,18 @@
 
 {% block content %}
 <div class="card" style="margin-bottom: 2rem;">
-    <div style="display: flex; justify-content: space-between;">
+    <div class="flex-responsive">
         <div>
-            <h1 style="color: var(--accent-color); margin-bottom: 0.5rem;">{{ quotation.quotation_number }}</h1>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                <h1 style="color: var(--accent-color); margin: 0;">{{ quotation.quotation_number }}</h1>
+                <span style="padding: 0.2rem 0.6rem; background: var(--border-color); border-radius: 4px; font-size: 0.8rem; font-weight: bold;">{{ quotation.get_status_display }}</span>
+                {% if quotation.status == 'DRAFT' %}
+                <form method="POST" action="{% url 'quotation_complete' quotation.pk %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Mark as Completed</button>
+                </form>
+                {% endif %}
+            </div>
             <p style="color: var(--text-secondary);">Project: {{ quotation.project.name }} &bull; Date: {{ quotation.date }}</p>
         </div>
         <div style="text-align: right;">

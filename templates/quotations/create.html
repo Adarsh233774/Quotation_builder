@@ -13,7 +13,7 @@
                     <option value="{{ p.id }}">{{ p.name }} ({{ p.client.name }})</option>
                 {% endfor %}
             </select>
-            <p style="font-size: 0.8rem; margin-top:0.5rem;"><a href="#">+ Add new project</a></p>
+            <p style="font-size: 0.8rem; margin-top:0.5rem;"><a href="{% url 'project_create' %}">+ Add new project</a></p>
         </div>
         
         <div style="margin-bottom: 1.5rem;">

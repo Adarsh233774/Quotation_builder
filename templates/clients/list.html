@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 style="color: var(--accent-color);">Clients Directory</h1>
+    <a href="{% url 'client_create' %}" class="btn btn-primary">+ Add New Client</a>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    {% for client in clients %}
+    <div class="card" style="padding: 1.5rem;">
+        <h2 style="color: var(--text-color); margin-bottom: 0.5rem;">{{ client.name }} {% if client.company %}<span style="color: var(--text-secondary); font-size: 1rem; font-weight: normal;">({{ client.company }})</span>{% endif %}</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            {% if client.email %}&#9993; {{ client.email }} &nbsp;&bull;&nbsp; {% endif %}
+            {% if client.phone %}&#9742; {{ client.phone }}{% endif %}
+        </p>
+
+        {% if client.projects.exists %}
+            <div style="border-left: 2px solid var(--border-color); padding-left: 1rem; margin-top: 1rem;">
+                <h3 style="color: var(--text-color); margin-bottom: 1rem; font-size: 1.1rem;">Projects</h3>
+                {% for project in client.projects.all %}
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="margin-bottom: 0.5rem; color: var(--accent-color);">{{ project.name }} <span style="color: var(--text-secondary); font-size: 0.9rem; font-weight: normal;">({{ project.get_project_type_display }})</span></h4>
+                        
+                        {% if project.quotations.exists %}
+                            <table class="builder-table" style="font-size: 0.9rem;">
+                                <thead>
+                                    <tr>
+                                        <th>Quotation #</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Total Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for quotation in project.quotations.all %}
+                                    <tr>
+                                        <td>{{ quotation.quotation_number }}</td>
+                                        <td>{{ quotation.date }}</td>
+                                        <td><span style="padding: 0.2rem 0.6rem; background: var(--border-color); border-radius: 4px; font-size: 0.75rem; font-weight: bold;">{{ quotation.get_status_display }}</span></td>
+                                        <td>&#8377; {{ quotation.total_amount }}</td>
+                                        <td>
+                                            <a href="{% url 'quotation_builder' quotation.pk %}" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Open Builder &rarr;</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p style="color: var(--text-secondary); font-style: italic; font-size: 0.9rem;">No quotations for this project yet.</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: var(--text-secondary); font-style: italic;">No projects associated with this client yet.</p>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="card" style="text-align: center; padding: 3rem;">
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">No clients found.</p>
+        <a href="{% url 'client_create' %}" class="btn btn-secondary">Add First Client</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

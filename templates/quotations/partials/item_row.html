@@ -1,50 +1,85 @@
-<tr class="item-row" id="item-{{ item.pk }}">
+<tr class="item-row" id="item-{{ item.pk }}" hx-include="closest tr">
     <td>
-        <input type="text" name="description" value="{{ item.description|default:'' }}" 
+        <div class="quill-wrapper">
+            <div class="quill-editor" id="quill-{{ item.pk }}" style="border: none; background: transparent; padding: 0.5rem; width: 100%; min-height: 40px;">
+                {{ item.description|safe|default:'New Item' }}
+            </div>
+        </div>
+        <input type="hidden" name="description" id="desc-{{ item.pk }}" value="{{ item.description|default:'New Item' }}"
                hx-post="{% url 'htmx_update_item' item.pk %}" 
-               hx-trigger="change, keyup delay:500ms"
-               hx-target="#item-{{ item.pk }}" 
-               hx-swap="outerHTML" style="border: none; background: transparent; padding: 0.5rem; width: 100%;">
+               hx-trigger="change delay:1000ms"
+               hx-swap="none">
+        <script>
+            (function() {
+                var quill = new Quill('#quill-{{ item.pk }}', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['clean']
+                        ]
+                    },
+                    placeholder: 'Enter description...'
+                });
+                
+                quill.on('text-change', function() {
+                    var hiddenInput = document.getElementById('desc-{{ item.pk }}');
+                    var html = quill.root.innerHTML;
+                    if (html === '<p><br></p>') html = '';
+                    
+                    if (hiddenInput.value !== html) {
+                        hiddenInput.value = html;
+                        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+            })();
+        </script>
     </td>
     <td>
-        <select name="calculation_type" 
+        <select id="type-{{ item.pk }}" name="calculation_type" 
                 hx-post="{% url 'htmx_update_item' item.pk %}" 
                 hx-trigger="change" 
-                hx-target="#item-{{ item.pk }}" 
-                hx-swap="outerHTML" style="border: none; background: transparent; padding: 0.5rem;">
+                hx-target="closest tr" 
+                hx-swap="morph:outerHTML" style="border: none; background: transparent; padding: 0.5rem; width: 100%; min-width: 110px;">
             <option value="AREA_RATE" {% if item.calculation_type == 'AREA_RATE' %}selected{% endif %}>Area &#215; Rate</option>
             <option value="QTY_RATE" {% if item.calculation_type == 'QTY_RATE' %}selected{% endif %}>Qty &#215; Rate</option>
             <option value="FIXED" {% if item.calculation_type == 'FIXED' %}selected{% endif %}>Fixed</option>
         </select>
     </td>
     <td>
-        <input type="number" step="0.01" name="length" class="input-sm" value="{{ item.length|default:'' }}"
+        <input id="len-{{ item.pk }}" type="number" step="0.01" name="length" class="input-sm text-center" value="{{ item.length|default:'' }}"
                {% if item.calculation_type != 'AREA_RATE' %}disabled style="opacity: 0.5;"{% endif %}
-               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup delay:500ms" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup changed delay:500ms" hx-sync="closest tr:replace" hx-target="closest tr" hx-swap="morph:outerHTML">
     </td>
     <td>
-        <input type="number" step="0.01" name="width" class="input-sm" value="{{ item.width|default:'' }}"
+        <input id="wid-{{ item.pk }}" type="number" step="0.01" name="width" class="input-sm text-center" value="{{ item.width|default:'' }}"
                {% if item.calculation_type != 'AREA_RATE' %}disabled style="opacity: 0.5;"{% endif %}
-               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup delay:500ms" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup changed delay:500ms" hx-sync="closest tr:replace" hx-target="closest tr" hx-swap="morph:outerHTML">
+    </td>
+    <td style="vertical-align: middle; text-align: center; color: var(--text-color);">
+        {% if item.calculation_type == 'AREA_RATE' %}{{ item.area|default:'0' }}{% else %}-{% endif %}
     </td>
     <td>
-        <input type="number" step="0.01" name="quantity" class="input-sm" value="{{ item.quantity|default:'' }}"
+        <input id="qty-{{ item.pk }}" type="number" step="0.01" name="quantity" class="input-sm text-center" value="{{ item.quantity|default:'' }}"
                {% if item.calculation_type == 'FIXED' %}disabled style="opacity: 0.5;"{% endif %}
-               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup delay:500ms" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup changed delay:500ms" hx-sync="closest tr:replace" hx-target="closest tr" hx-swap="morph:outerHTML">
     </td>
     <td>
-        <input type="number" step="0.01" name="rate" class="input-sm" value="{{ item.rate|default:'' }}"
-               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup delay:500ms" hx-target="#item-{{ item.pk }}" hx-swap="outerHTML">
+        <input id="rate-{{ item.pk }}" type="number" step="0.01" name="rate" class="input-sm text-right" value="{{ item.rate|default:'' }}"
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup changed delay:500ms" hx-sync="closest tr:replace" hx-target="closest tr" hx-swap="morph:outerHTML">
     </td>
-    <td style="vertical-align: middle; font-weight: 500;">
-        {{ item.amount }}
+    <td style="vertical-align: middle;">
+        <input id="amt-{{ item.pk }}" type="number" step="0.01" name="amount" class="input-sm text-right" value="{{ item.amount|default:'' }}"
+               {% if item.calculation_type != 'FIXED' %}readonly style="border: none; background: transparent; font-weight: 500;"{% endif %}
+               hx-post="{% url 'htmx_update_item' item.pk %}" hx-trigger="change, keyup changed delay:500ms" hx-sync="closest tr:replace" hx-target="closest tr" hx-swap="morph:outerHTML">
+        {% if request.META.HTTP_HX_REQUEST %}
+        <div hx-swap-oob="innerHTML:#section-total-{{ item.section.pk }}">
+            &#8377; {{ item.section.section_total }}
+        </div>
+        <div hx-swap-oob="innerHTML:#grand-total">
+            &#8377; {{ item.section.quotation.total_amount }}
+        </div>
+        {% endif %}
     </td>
-    
-    <!-- HTMX OOB updates for totals -->
-    <div hx-swap-oob="innerHTML:#section-total-{{ item.section.pk }}">
-        &#8377; {{ item.section.section_total }}
-    </div>
-    <div hx-swap-oob="innerHTML:#grand-total">
-        &#8377; {{ item.section.quotation.total_amount }}
-    </div>
 </tr>
